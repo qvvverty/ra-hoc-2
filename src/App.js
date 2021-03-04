@@ -21,7 +21,7 @@ function Popular(props) {
 function Article(props) {
   return (
     <div className="item item-article">
-      <h3><a href="#">{props.title}</a></h3>
+      <h3><a href="https://google.com">{props.title}</a></h3>
       <p className="views">Прочтений: {props.views}</p>
     </div>
   )
@@ -30,30 +30,53 @@ function Article(props) {
 function Video(props) {
   return (
     <div className="item item-video">
-      <iframe src={props.url} frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+      <iframe src={props.url} frameBorder="0" allow="autoplay; encrypted-media" allowFullScreen title={props.url}></iframe>
       <p className="views">Просмотров: {props.views}</p>
     </div>
   )
 };
+
+function withLabels(Component) {
+  function LabeledComponent(props) {
+    if (props.views < 100) return (
+      <New>
+        <Component {...props} />
+      </New>
+    )
+
+    if (props.views >= 1000) return (
+      <Popular>
+        <Component {...props} />
+      </Popular>
+    )
+
+    return <Component {...props} />
+  }
+
+  return LabeledComponent;
+}
+
+const LabeledVideo = withLabels(Video);
+const LabeledArticle = withLabels(Article);
 
 function List(props) {
   return props.list.map(item => {
     switch (item.type) {
       case 'video':
         return (
-          <Video {...item} />
+          <LabeledVideo {...item} key={item.url} />
         );
 
-      case 'article':
+      default:
         return (
-          <Article {...item} />
+          <LabeledArticle {...item} key={item.title} />
         );
     }
   });
 };
 
 export default function App() {
-  const [list, setList] = useState([
+  const [list] = useState([
     {
       type: 'video',
       url: 'https://www.youtube.com/embed/rN6nlNC9WQA?rel=0&amp;controls=0&amp;showinfo=0',
